@@ -6,20 +6,25 @@ set -euo pipefail
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FILES=(.zshrc .zprofile .zshenv .tmux.conf .p10k.zsh)
 
-for f in "${FILES[@]}"; do
-  target="$HOME/$f"
-  src="$DOTFILES_DIR/$f"
+link() {
+  local rel="$1" target="$HOME/$1" src="$DOTFILES_DIR/$1"
   if [ -L "$target" ] && [ "$(readlink "$target")" = "$src" ]; then
-    echo "ok      $f (already linked)"
-    continue
+    echo "ok      $rel (already linked)"
+    return
   fi
+  mkdir -p "$(dirname "$target")"
   if [ -e "$target" ]; then
     mv "$target" "$target.bak"
-    echo "backup  $f -> $f.bak"
+    echo "backup  $rel -> $rel.bak"
   fi
   ln -s "$src" "$target"
-  echo "linked  $f"
+  echo "linked  $rel"
+}
+
+for f in "${FILES[@]}"; do
+  link "$f"
 done
+link ".config/ghostty/config"
 
 if command -v brew >/dev/null 2>&1; then
   echo
