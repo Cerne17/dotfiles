@@ -46,7 +46,12 @@ Settings → Appearance), no action needed:
   auto-started per instance) is how it reaches an already-open nvim;
   tmux gets `source-file`d directly on its socket. Only touches sessions
   currently in "auto" mode (see below) — an explicit pick is left alone.
-  Logs to `/tmp/cerne-theme-watch.log`; check it's running with
+  `.GlobalPreferences.plist` holds far more than just the Dark Mode flag
+  (recent items, input sources, etc.), so most triggers have nothing to
+  do with appearance — the script caches the last-applied polarity in
+  `/tmp/cerne-theme-watch.last` and exits immediately (~17ms, no tmux/nvim
+  work at all) unless it actually changed. Logs to
+  `/tmp/cerne-theme-watch.log`; check it's running with
   `launchctl list pro.cerne.theme-watch`.
 - **zsh** (prompt + syntax highlighting) checks on every new shell
   (`_cerne_system_is_dark` in `.zshrc`) — not live within an already-open

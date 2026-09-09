@@ -15,6 +15,21 @@ is_dark() {
   [ "$(defaults read -g AppleInterfaceStyle 2>/dev/null)" = "Dark" ]
 }
 
+# .GlobalPreferences.plist holds far more than AppleInterfaceStyle
+# (recent items, input sources, etc.), so WatchPaths fires on writes that
+# have nothing to do with Dark Mode. Skip all tmux/nvim work — no socket
+# enumeration, no subprocess spawns — unless the resolved polarity
+# actually changed since the last run.
+LAST_STATE_FILE="/tmp/cerne-theme-watch.last"
+current="light"
+is_dark && current="dark"
+last=""
+[ -f "$LAST_STATE_FILE" ] && last="$(cat "$LAST_STATE_FILE")"
+if [ "$current" = "$last" ]; then
+  exit 0
+fi
+echo "$current" > "$LAST_STATE_FILE"
+
 # ---- tmux: re-source the matching config for every "auto" server ----
 sync_tmux() {
   local state="auto"
@@ -22,7 +37,7 @@ sync_tmux() {
   [ "$state" = "auto" ] || return 0
 
   local conf="$HOME/.tmux.conf"
-  is_dark || conf="$HOME/.tmux-light.conf"
+  [ "$current" = "dark" ] || conf="$HOME/.tmux-light.conf"
 
   local sockdir="/tmp/tmux-$(id -u)"
   [ -d "$sockdir" ] || return 0
