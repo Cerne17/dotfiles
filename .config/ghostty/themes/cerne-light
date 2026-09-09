@@ -1,0 +1,33 @@
+# cerne.pro brand theme for Ghostty — "sapwood" (light)
+# Tokens from ~/Documents/design-guidelines. Per the guidelines' own note,
+# amber (heartwood) fails contrast on light backgrounds, so oxblood stands
+# in as the accent/red throughout. All ANSI text slots verified >=4.5:1
+# against the #ECEBE6 background (WCAG AA); red/green/white/bright-red
+# reuse brand tokens directly, the rest are darkened tints of the dark
+# theme's hues to stay legible as dark-on-light text.
+
+background = ECEBE6
+foreground = 1A1B1E
+
+cursor-color = 8C3B24
+cursor-text = ECEBE6
+
+selection-background = D8D5CC
+selection-foreground = 1A1B1E
+
+palette = 0=#3D3B36
+palette = 1=#AE4A2D
+palette = 2=#3A6E52
+palette = 3=#975B12
+palette = 4=#526D89
+palette = 5=#97576A
+palette = 6=#427368
+palette = 7=#5A5852
+palette = 8=#6D6A65
+palette = 9=#8C3B24
+palette = 10=#336048
+palette = 11=#7E4C0F
+palette = 12=#435970
+palette = 13=#7C4857
+palette = 14=#365F56
+palette = 15=#1A1B1E

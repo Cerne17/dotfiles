@@ -1,34 +1,8 @@
-# cerne.pro brand palette — "heartwood core" (dark)
-# ink / surface / surface-2 / text / text-muted / heartwood / heartwood-glow /
-# oxblood / sapwood, from ~/Documents/design-guidelines. Non-brand ANSI slots
-# (blue/magenta/cyan) picked to harmonize with the warm-neutral core.
+# cerne.pro brand config for Ghostty. Colors live in themes/cerne (dark) and
+# themes/cerne-light — this line auto-switches with macOS appearance.
+theme = dark:cerne,light:cerne-light
 
-background = 0C0D10
-foreground = E8E4DB
-
-cursor-color = E89A3C
-cursor-text = 0C0D10
 cursor-style = block
-
-selection-background = 1F2229
-selection-foreground = E8E4DB
-
-palette = 0=#0C0D10
-palette = 1=#8C3B24
-palette = 2=#4E8F6B
-palette = 3=#E89A3C
-palette = 4=#5C7A99
-palette = 5=#9C5B6E
-palette = 6=#5FA394
-palette = 7=#9A968C
-palette = 8=#1F2229
-palette = 9=#B0502E
-palette = 10=#63B389
-palette = 11=#F6B65A
-palette = 12=#7C9CBF
-palette = 13=#B97690
-palette = 14=#7FC2B2
-palette = 15=#E8E4DB
 
 font-family = MesloLGS NF
 font-size = 14

@@ -1,0 +1,35 @@
+# cerne.pro brand theme for Ghostty — "heartwood core" (dark)
+# Tokens from ~/Documents/design-guidelines.
+#
+# WCAG contrast pass: red(1)/blue(4)/magenta(5)/bright-red(9) were all
+# below 4.5:1 against the ink background (red as low as 2.56:1 — oxblood
+# is a brand background/depth color, not meant as foreground text; see
+# the guidelines' own "not for body text" rule). Brightened tints used
+# here for the ANSI text slots; ink/surface/heartwood/sapwood themselves
+# were already >=5:1 and are unchanged.
+
+background = 0C0D10
+foreground = E8E4DB
+
+cursor-color = E89A3C
+cursor-text = 0C0D10
+
+selection-background = 1F2229
+selection-foreground = E8E4DB
+
+palette = 0=#0C0D10
+palette = 1=#CC5837
+palette = 2=#4E8F6B
+palette = 3=#E89A3C
+palette = 4=#5F7F9F
+palette = 5=#A8697C
+palette = 6=#5FA394
+palette = 7=#9A968C
+palette = 8=#1F2229
+palette = 9=#D77E64
+palette = 10=#63B389
+palette = 11=#F6B65A
+palette = 12=#7C9CBF
+palette = 13=#B97690
+palette = 14=#7FC2B2
+palette = 15=#E8E4DB

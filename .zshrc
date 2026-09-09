@@ -108,35 +108,119 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-# cerne.pro brand palette applied to autosuggestions + syntax highlighting
-export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#9A968C"
+# cerne.pro brand palette: light/dark toggle for autosuggestions + syntax
+# highlighting + prompt. State persisted in ~/.cache/cerne-theme (default
+# dark). Toggle with `cerne-theme [light|dark]` (no arg = flip) — also
+# re-syncs tmux's status bar if run inside one. All fg values below are
+# independently WCAG-AA verified (>=4.5:1) against their own background;
+# see colors/cerne.lua / cerne-light.lua in Cerne-Nvim for the same audit
+# applied to Neovim.
+CERNE_THEME_STATE="$HOME/.cache/cerne-theme"
 
-typeset -A ZSH_HIGHLIGHT_STYLES
-ZSH_HIGHLIGHT_STYLES[default]='fg=#E8E4DB'
-ZSH_HIGHLIGHT_STYLES[comment]='fg=#5A5852'
-ZSH_HIGHLIGHT_STYLES[alias]='fg=#4E8F6B'
-ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=#4E8F6B'
-ZSH_HIGHLIGHT_STYLES[builtin]='fg=#4E8F6B'
-ZSH_HIGHLIGHT_STYLES[function]='fg=#4E8F6B'
-ZSH_HIGHLIGHT_STYLES[command]='fg=#4E8F6B'
-ZSH_HIGHLIGHT_STYLES[precommand]='fg=#4E8F6B,underline'
-ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=#4E8F6B'
-ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=#E89A3C'
-ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=#9A968C'
-ZSH_HIGHLIGHT_STYLES[path]='fg=#E8E4DB,underline'
-ZSH_HIGHLIGHT_STYLES[path_prefix]='fg=#9A968C'
-ZSH_HIGHLIGHT_STYLES[globbing]='fg=#F6B65A'
-ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=#F6B65A'
-ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#9A968C'
-ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#9A968C'
-ZSH_HIGHLIGHT_STYLES[back-quoted-argument]='fg=#E89A3C'
-ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#F6B65A'
-ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#F6B65A'
-ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=#F6B65A'
-ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]='fg=#F6B65A'
-ZSH_HIGHLIGHT_STYLES[assign]='fg=#9A968C'
-ZSH_HIGHLIGHT_STYLES[redirection]='fg=#E89A3C'
-ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#8C3B24,bold'
+_cerne_apply_dark() {
+  export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#9A968C"
+  typeset -gA ZSH_HIGHLIGHT_STYLES
+  ZSH_HIGHLIGHT_STYLES[default]='fg=#E8E4DB'
+  ZSH_HIGHLIGHT_STYLES[comment]='fg=#9A968C'
+  ZSH_HIGHLIGHT_STYLES[alias]='fg=#4E8F6B'
+  ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=#4E8F6B'
+  ZSH_HIGHLIGHT_STYLES[builtin]='fg=#4E8F6B'
+  ZSH_HIGHLIGHT_STYLES[function]='fg=#4E8F6B'
+  ZSH_HIGHLIGHT_STYLES[command]='fg=#4E8F6B'
+  ZSH_HIGHLIGHT_STYLES[precommand]='fg=#4E8F6B,underline'
+  ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=#4E8F6B'
+  ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=#E89A3C'
+  ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=#9A968C'
+  ZSH_HIGHLIGHT_STYLES[path]='fg=#E8E4DB,underline'
+  ZSH_HIGHLIGHT_STYLES[path_prefix]='fg=#9A968C'
+  ZSH_HIGHLIGHT_STYLES[globbing]='fg=#F6B65A'
+  ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=#F6B65A'
+  ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#9A968C'
+  ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#9A968C'
+  ZSH_HIGHLIGHT_STYLES[back-quoted-argument]='fg=#E89A3C'
+  ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#F6B65A'
+  ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#F6B65A'
+  ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=#F6B65A'
+  ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]='fg=#F6B65A'
+  ZSH_HIGHLIGHT_STYLES[assign]='fg=#9A968C'
+  ZSH_HIGHLIGHT_STYLES[redirection]='fg=#E89A3C'
+  ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#CC5837,bold' # WCAG-safe tint of oxblood; raw oxblood is only 2.56:1 as text on ink
+  CERNE_P10K_CONFIG="$HOME/.p10k.zsh"
+}
+
+_cerne_apply_light() {
+  # amber (heartwood) fails contrast on light per the brand guidelines, so
+  # oxblood (#8C3B24) stands in for both heartwood and heartwood-glow, same
+  # as the docs specify. `#526D89` is a darkened, light-safe tint of the
+  # dark theme's info-blue, used here only so strings/quotes don't collide
+  # with the oxblood-colored keywords — the brand doc doesn't allocate a
+  # separate hue for that on light, this is the pragmatic minimal addition.
+  export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#5A5852"
+  typeset -gA ZSH_HIGHLIGHT_STYLES
+  ZSH_HIGHLIGHT_STYLES[default]='fg=#1A1B1E'
+  ZSH_HIGHLIGHT_STYLES[comment]='fg=#5A5852'
+  ZSH_HIGHLIGHT_STYLES[alias]='fg=#3A6E52'
+  ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=#3A6E52'
+  ZSH_HIGHLIGHT_STYLES[builtin]='fg=#3A6E52'
+  ZSH_HIGHLIGHT_STYLES[function]='fg=#3A6E52'
+  ZSH_HIGHLIGHT_STYLES[command]='fg=#3A6E52'
+  ZSH_HIGHLIGHT_STYLES[precommand]='fg=#3A6E52,underline'
+  ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=#3A6E52'
+  ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=#8C3B24'
+  ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=#5A5852'
+  ZSH_HIGHLIGHT_STYLES[path]='fg=#1A1B1E,underline'
+  ZSH_HIGHLIGHT_STYLES[path_prefix]='fg=#5A5852'
+  ZSH_HIGHLIGHT_STYLES[globbing]='fg=#526D89'
+  ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=#526D89'
+  ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#5A5852'
+  ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#5A5852'
+  ZSH_HIGHLIGHT_STYLES[back-quoted-argument]='fg=#8C3B24'
+  ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#526D89'
+  ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#526D89'
+  ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=#526D89'
+  ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]='fg=#526D89'
+  ZSH_HIGHLIGHT_STYLES[assign]='fg=#5A5852'
+  ZSH_HIGHLIGHT_STYLES[redirection]='fg=#8C3B24'
+  ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#8C3B24,bold'
+  CERNE_P10K_CONFIG="$HOME/.p10k-light.zsh"
+}
+
+cerne-theme() {
+  local want="$1"
+  local current="dark"
+  [ -f "$CERNE_THEME_STATE" ] && current="$(cat "$CERNE_THEME_STATE")"
+  if [ -z "$want" ]; then
+    [ "$current" = "dark" ] && want="light" || want="dark"
+  fi
+  mkdir -p "$(dirname "$CERNE_THEME_STATE")"
+  echo "$want" > "$CERNE_THEME_STATE"
+
+  if [ "$want" = "light" ]; then
+    _cerne_apply_light
+  else
+    _cerne_apply_dark
+  fi
+  [[ -f "$CERNE_P10K_CONFIG" ]] && source "$CERNE_P10K_CONFIG"
+  command -v p10k >/dev/null 2>&1 && p10k reload
+
+  if [ -n "$TMUX" ]; then
+    if [ "$want" = "light" ]; then
+      tmux source-file ~/.tmux-light.conf
+    else
+      tmux source-file ~/.tmux.conf
+    fi
+  fi
+  echo "cerne: $want theme"
+}
+
+# Apply the saved theme on shell startup (default dark)
+CERNE_THEME_STARTUP="dark"
+[ -f "$CERNE_THEME_STATE" ] && CERNE_THEME_STARTUP="$(cat "$CERNE_THEME_STATE")"
+if [ "$CERNE_THEME_STARTUP" = "light" ]; then
+  _cerne_apply_light
+else
+  _cerne_apply_dark
+fi
 
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
@@ -170,5 +254,5 @@ alias la="eza -la --icons --group-directories-first"
 alias lt="eza --tree --icons --group-directories-first"
 alias cat="bat --paging=never"
 
-# Powerlevel10k config
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+# Powerlevel10k config (dark/light chosen above by cerne-theme's startup logic)
+[[ -f "$CERNE_P10K_CONFIG" ]] && source "$CERNE_P10K_CONFIG"

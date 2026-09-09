@@ -4,7 +4,7 @@
 set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-FILES=(.zshrc .zprofile .zshenv .tmux.conf .p10k.zsh)
+FILES=(.zshrc .zprofile .zshenv .tmux.conf .tmux-light.conf .p10k.zsh .p10k-light.zsh)
 
 link() {
   local rel="$1" target="$HOME/$1" src="$DOTFILES_DIR/$1"
@@ -25,6 +25,8 @@ for f in "${FILES[@]}"; do
   link "$f"
 done
 link ".config/ghostty/config"
+link ".config/ghostty/themes/cerne"
+link ".config/ghostty/themes/cerne-light"
 
 if command -v brew >/dev/null 2>&1; then
   echo
