@@ -31,17 +31,27 @@ Manual steps `install.sh` can't do for you:
 - Optional: run `p10k configure` to hand-tune the prompt instead of the
   bundled `.p10k.zsh` (Lean two-line preset, brand-recolored).
 
-## Light/dark: follows the system by default
+## Light/dark: follows the system by default, live
 
 Everything here defaults to matching macOS's Appearance setting (System
 Settings → Appearance), no action needed:
 
-- **Ghostty** auto-switches live (`theme = dark:cerne,light:cerne-light`
-  in `.config/ghostty/config`) — it's a native app capability, no restart.
-- **tmux** checks system appearance once at server start (`if-shell` at
-  the end of `.tmux.conf`) and layers `.tmux-light.conf` on top if light.
+- **Ghostty** auto-switches live — a native app capability, no restart.
+- **tmux** and **nvim** (open instances too, not just new ones) switch
+  live via `bin/cerne-theme-watch.sh`, a `launchd` LaunchAgent
+  (`launchagents/pro.cerne.theme-watch.plist.template`, installed by
+  `install.sh`) that watches `~/Library/Preferences/.GlobalPreferences.plist`
+  — the file macOS writes to the instant Dark Mode toggles — and reacts
+  within ~1s. No polling. Neovim's built-in RPC server (`v:servername`,
+  auto-started per instance) is how it reaches an already-open nvim;
+  tmux gets `source-file`d directly on its socket. Only touches sessions
+  currently in "auto" mode (see below) — an explicit pick is left alone.
+  Logs to `/tmp/cerne-theme-watch.log`; check it's running with
+  `launchctl list pro.cerne.theme-watch`.
 - **zsh** (prompt + syntax highlighting) checks on every new shell
-  (`_cerne_system_is_dark` in `.zshrc`).
+  (`_cerne_system_is_dark` in `.zshrc`) — not live within an already-open
+  shell, since there's no live-reactive way to restyle an in-progress
+  prompt without disrupting it.
 
 An explicit choice overrides this and stays sticky until you switch back
 to auto:
@@ -75,6 +85,8 @@ everything in sync.
 | `.config/ghostty/config` | Ghostty font/cursor-style/padding + `theme` directive |
 | `.config/ghostty/themes/cerne` | Ghostty color theme (dark) |
 | `.config/ghostty/themes/cerne-light` | Ghostty color theme (light) |
+| `bin/cerne-theme-watch.sh` | Pushes system-appearance changes into "auto" tmux/nvim instances |
+| `launchagents/pro.cerne.theme-watch.plist.template` | LaunchAgent for the above (installed to `~/Library/LaunchAgents`) |
 | `Brewfile` | packages this setup depends on |
 
 ## Related

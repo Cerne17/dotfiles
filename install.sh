@@ -28,6 +28,20 @@ link ".config/ghostty/config"
 link ".config/ghostty/themes/cerne"
 link ".config/ghostty/themes/cerne-light"
 
+chmod +x "$DOTFILES_DIR/bin/cerne-theme-watch.sh"
+
+if [ "$(uname)" = "Darwin" ]; then
+  echo
+  echo "Installing cerne-theme-watch LaunchAgent (instant tmux/nvim theme"
+  echo "sync on macOS Dark Mode toggle, no manual command needed)..."
+  mkdir -p "$HOME/Library/LaunchAgents"
+  plist="$HOME/Library/LaunchAgents/pro.cerne.theme-watch.plist"
+  sed "s|__HOME__|$HOME|g" "$DOTFILES_DIR/launchagents/pro.cerne.theme-watch.plist.template" > "$plist"
+  launchctl unload "$plist" >/dev/null 2>&1 || true
+  launchctl load "$plist"
+  echo "installed $plist"
+fi
+
 if command -v brew >/dev/null 2>&1; then
   echo
   echo "Installing Homebrew packages from Brewfile..."
