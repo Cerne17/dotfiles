@@ -31,23 +31,35 @@ Manual steps `install.sh` can't do for you:
 - Optional: run `p10k configure` to hand-tune the prompt instead of the
   bundled `.p10k.zsh` (Lean two-line preset, brand-recolored).
 
-## Light/dark toggle
+## Light/dark: follows the system by default
 
-Ghostty auto-switches with macOS appearance (`theme = dark:cerne,light:cerne-light`
-in `.config/ghostty/config`). tmux and the zsh prompt/syntax highlighting
-don't have an OS-appearance hook, so they're switched together with one
-command:
+Everything here defaults to matching macOS's Appearance setting (System
+Settings → Appearance), no action needed:
+
+- **Ghostty** auto-switches live (`theme = dark:cerne,light:cerne-light`
+  in `.config/ghostty/config`) — it's a native app capability, no restart.
+- **tmux** checks system appearance once at server start (`if-shell` at
+  the end of `.tmux.conf`) and layers `.tmux-light.conf` on top if light.
+- **zsh** (prompt + syntax highlighting) checks on every new shell
+  (`_cerne_system_is_dark` in `.zshrc`).
+
+An explicit choice overrides this and stays sticky until you switch back
+to auto:
 
 ```sh
-cerne-theme        # toggle
+cerne-theme        # toggle explicit light/dark
 cerne-theme light  # explicit
 cerne-theme dark   # explicit
+cerne-theme auto   # resume following the system
 ```
 
 This re-sources the right `.p10k*.zsh`, swaps `ZSH_HIGHLIGHT_STYLES`, and
-(if run inside tmux) re-sources the matching `.tmux*.conf` too. The choice
-persists in `~/.cache/cerne-theme` and is re-applied on every new shell.
-tmux alone (no zsh involvement) can also be toggled with `prefix + T`.
+(if run inside tmux) re-syncs the matching `.tmux*.conf` immediately too.
+The choice (`auto`/`light`/`dark`) persists in `~/.cache/cerne-theme` and
+is re-applied on every new shell. `prefix + T` in tmux is a quick manual
+toggle scoped to the current server session only (doesn't persist, and
+doesn't touch the zsh/nvim side) — `cerne-theme` is the one that keeps
+everything in sync.
 
 ## What's here
 

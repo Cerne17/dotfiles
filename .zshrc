@@ -109,13 +109,20 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 # cerne.pro brand palette: light/dark toggle for autosuggestions + syntax
-# highlighting + prompt. State persisted in ~/.cache/cerne-theme (default
-# dark). Toggle with `cerne-theme [light|dark]` (no arg = flip) — also
+# highlighting + prompt. Default is "auto": follows the macOS system
+# appearance on every new shell. `cerne-theme [light|dark]` sets an
+# explicit override that stays sticky across shells; `cerne-theme auto`
+# resumes following the system. State persisted in ~/.cache/cerne-theme
+# (contents: "auto", "light", or "dark"). Any explicit/auto switch also
 # re-syncs tmux's status bar if run inside one. All fg values below are
 # independently WCAG-AA verified (>=4.5:1) against their own background;
 # see colors/cerne.lua / cerne-light.lua in Cerne-Nvim for the same audit
 # applied to Neovim.
 CERNE_THEME_STATE="$HOME/.cache/cerne-theme"
+
+_cerne_system_is_dark() {
+  [ "$(defaults read -g AppleInterfaceStyle 2>/dev/null)" = "Dark" ]
+}
 
 _cerne_apply_dark() {
   export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#9A968C"
@@ -186,16 +193,30 @@ _cerne_apply_light() {
 }
 
 cerne-theme() {
-  local want="$1"
-  local current="dark"
-  [ -f "$CERNE_THEME_STATE" ] && current="$(cat "$CERNE_THEME_STATE")"
-  if [ -z "$want" ]; then
-    [ "$current" = "dark" ] && want="light" || want="dark"
+  local arg="$1"
+  local want
+
+  if [ "$arg" = "auto" ]; then
+    want="auto"
+  elif [ "$arg" = "light" ] || [ "$arg" = "dark" ]; then
+    want="$arg"
+  elif [ -z "$arg" ]; then
+    # No arg: toggle the currently-*resolved* polarity explicitly
+    # (regardless of whether we got here via auto or an explicit pick).
+    [ "$CERNE_THEME_RESOLVED" = "dark" ] && want="light" || want="dark"
+  else
+    echo "usage: cerne-theme [light|dark|auto]" >&2
+    return 1
   fi
+
   mkdir -p "$(dirname "$CERNE_THEME_STATE")"
   echo "$want" > "$CERNE_THEME_STATE"
 
-  if [ "$want" = "light" ]; then
+  local resolved="$want"
+  [ "$want" = "auto" ] && { _cerne_system_is_dark && resolved="dark" || resolved="light"; }
+  CERNE_THEME_RESOLVED="$resolved"
+
+  if [ "$resolved" = "light" ]; then
     _cerne_apply_light
   else
     _cerne_apply_dark
@@ -204,21 +225,27 @@ cerne-theme() {
   command -v p10k >/dev/null 2>&1 && p10k reload
 
   if [ -n "$TMUX" ]; then
-    if [ "$want" = "light" ]; then
+    if [ "$resolved" = "light" ]; then
       tmux source-file ~/.tmux-light.conf
     else
       tmux source-file ~/.tmux.conf
     fi
   fi
-  echo "cerne: $want theme"
+  if [ "$want" = "auto" ]; then
+    echo "cerne: auto ($resolved, following system)"
+  else
+    echo "cerne: $resolved theme (explicit)"
+  fi
 }
 
-# Apply the saved theme on shell startup (default dark)
-CERNE_THEME_STARTUP="dark"
+# Apply the saved (or system-detected) theme on shell startup
+CERNE_THEME_STARTUP="auto"
 [ -f "$CERNE_THEME_STATE" ] && CERNE_THEME_STARTUP="$(cat "$CERNE_THEME_STATE")"
-if [ "$CERNE_THEME_STARTUP" = "light" ]; then
+if [ "$CERNE_THEME_STARTUP" = "light" ] || { [ "$CERNE_THEME_STARTUP" = "auto" ] && ! _cerne_system_is_dark; }; then
+  CERNE_THEME_RESOLVED="light"
   _cerne_apply_light
 else
+  CERNE_THEME_RESOLVED="dark"
   _cerne_apply_dark
 fi
 
