@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Symlinks these dotfiles into $HOME. Existing non-symlink files are backed
+# up to *.bak before being replaced. Safe to re-run.
+set -euo pipefail
+
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FILES=(.zshrc .zprofile .zshenv .tmux.conf .p10k.zsh)
+
+for f in "${FILES[@]}"; do
+  target="$HOME/$f"
+  src="$DOTFILES_DIR/$f"
+  if [ -L "$target" ] && [ "$(readlink "$target")" = "$src" ]; then
+    echo "ok      $f (already linked)"
+    continue
+  fi
+  if [ -e "$target" ]; then
+    mv "$target" "$target.bak"
+    echo "backup  $f -> $f.bak"
+  fi
+  ln -s "$src" "$target"
+  echo "linked  $f"
+done
+
+if command -v brew >/dev/null 2>&1; then
+  echo
+  echo "Installing Homebrew packages from Brewfile..."
+  brew bundle --file="$DOTFILES_DIR/Brewfile"
+else
+  echo
+  echo "Homebrew not found — install it first, then run: brew bundle --file=$DOTFILES_DIR/Brewfile"
+fi
+
+echo
+echo "Done. nvim config lives in its own repo:"
+echo "  git clone https://github.com/Cerne17/Cerne-Nvim.git ~/.config/nvim"
+echo
+echo "Then set your terminal font to 'MesloLGS NF' and restart your shell."

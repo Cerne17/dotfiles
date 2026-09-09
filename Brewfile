@@ -1,0 +1,11 @@
+tap "homebrew/bundle"
+
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
+brew "fzf"
+brew "zoxide"
+brew "eza"
+brew "bat"
+brew "powerlevel10k"
+brew "figlet"
+brew "font-meslo-lg-nerd-font"
