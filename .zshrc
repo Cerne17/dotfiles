@@ -276,10 +276,10 @@ alias push="git push"
 alias zshrc="nvim ~/.zshrc"
 
 # Added by Antigravity
-export PATH="/Users/miguelcerne/.antigravity/antigravity/bin:$PATH"
+export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 
 # Added by Antigravity IDE
-export PATH="/Users/miguelcerne/.antigravity-ide/antigravity-ide/bin:$PATH"
+export PATH="$HOME/.antigravity-ide/antigravity-ide/bin:$PATH"
 
 # fzf (fuzzy finder): Ctrl+R history, Ctrl+T files, Alt+C cd
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
