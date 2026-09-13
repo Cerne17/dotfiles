@@ -19,7 +19,17 @@ git clone https://github.com/Cerne17/dotfiles.git ~/dotfiles
 ```
 
 This symlinks the dotfiles into `$HOME` (backing up anything already there
-as `*.bak`) and installs the brew packages in `Brewfile`.
+as `*.bak`), clones tpm, and installs the brew packages in `Brewfile`.
+
+The symlinks are the point: editing `~/.zshrc` has to be the same thing as
+editing this repo. If they are ever replaced by plain copies the two drift
+apart silently, so it is worth checking:
+
+```sh
+ls -l ~/.zshrc ~/.tmux.conf ~/.config/ghostty/config   # each should be a symlink
+```
+
+Re-run `install.sh` if any of them is a regular file.
 
 Manual steps `install.sh` can't do for you:
 - If Ghostty isn't already your terminal, launch it once via the Brewfile
@@ -74,16 +84,47 @@ The choice (`auto`/`light`/`dark`) persists in `~/.cache/cerne-theme` and
 is re-applied on every new shell. `prefix + T` in tmux is a quick manual
 toggle scoped to the current server session only (doesn't persist, and
 doesn't touch the zsh/nvim side) — `cerne-theme` is the one that keeps
-everything in sync.
+everything in sync. It sets the `@cerne_explicit` tmux option, which
+suppresses the appearance probe at the bottom of `.tmux.conf`; without
+that the toggle could never reach dark while macOS was in light mode,
+since sourcing the dark config would re-detect light and bounce straight
+back. `cerne-theme auto` clears the flag.
+
+## tmux keys
+
+`prefix` is still `C-b`.
+
+| Key | Action |
+|---|---|
+| `C-h` / `C-j` / `C-k` / `C-l` | Move across panes *and* Neovim splits (vim-tmux-navigator, no prefix) |
+| `prefix + \|` / `prefix + -` | Split vertically / horizontally, keeping the current directory |
+| `prefix + h/j/k/l` | Select pane left/down/up/right |
+| `prefix + H/J/K/L` | Resize pane (repeatable) |
+| `prefix + g` | lazygit in a popup |
+| `prefix + r` | Reload the config |
+| `prefix + T` | Toggle light/dark for this server |
+| `prefix + I` / `prefix + U` | tpm: install / update plugins |
+
+Copy mode uses vi keys: `v` selects, `y` copies to the macOS clipboard.
+Sessions are saved and restored automatically by resurrect + continuum,
+Neovim sessions included.
+
+## Shell startup
+
+Around 170ms. `nvm` is the reason it is not 500ms: sourcing `nvm.sh`
+eagerly cost 340ms, so the default node version goes straight on `PATH`
+and only the `nvm` command itself is a lazy stub. `node`, `npm` and `npx`
+stay real binaries and never pay for it; `nvm` loads on first use, or on
+entering a directory with a `.nvmrc`.
 
 ## What's here
 
 | File | Purpose |
 |---|---|
-| `.zshrc` | oh-my-zsh config, plugins, aliases, fzf/zoxide/eza/bat wiring, `cerne-theme` toggle |
+| `.zshrc` | oh-my-zsh config, plugins, aliases, fzf/fzf-tab/zoxide/eza/bat wiring, lazy nvm, `cerne-theme` toggle |
 | `.zprofile` | Python/pyenv PATH setup |
 | `.zshenv` | cargo env, local bin PATH |
-| `.tmux.conf` | tmux status bar/pane styling, cerne.pro palette (dark), truecolor |
+| `.tmux.conf` | tmux keybindings, plugins (tpm), status bar/pane styling, cerne.pro palette (dark), truecolor |
 | `.tmux-light.conf` | tmux styling, light counterpart |
 | `.p10k.zsh` | Powerlevel10k prompt config (Lean preset, brand-recolored, dark) |
 | `.p10k-light.zsh` | Powerlevel10k prompt config, light counterpart |
