@@ -78,6 +78,12 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git colored-man-pages extract docker docker-compose)
 
+# oh-my-zsh leaves SAVEHIST at 10000 while HISTSIZE is 50000, so the on-disk
+# history was truncated to a fifth of what the session held. Set both before
+# sourcing omz, which only fills in what is unset.
+HISTSIZE=50000
+SAVEHIST=50000
+
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
