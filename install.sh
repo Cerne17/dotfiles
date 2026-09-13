@@ -30,6 +30,17 @@ link ".config/ghostty/themes/cerne-light"
 
 chmod +x "$DOTFILES_DIR/bin/cerne-theme-watch.sh"
 
+# tmux plugin manager, required by the @plugin lines in .tmux.conf.
+TPM_DIR="$HOME/.tmux/plugins/tpm"
+if [ -d "$TPM_DIR" ]; then
+  echo "ok      tpm (already cloned)"
+else
+  echo
+  echo "Cloning tmux plugin manager..."
+  git clone --depth 1 https://github.com/tmux-plugins/tpm "$TPM_DIR"
+  echo "Open tmux and press prefix + I to install the plugins."
+fi
+
 if [ "$(uname)" = "Darwin" ]; then
   echo
   echo "Installing cerne-theme-watch LaunchAgent (instant tmux/nvim theme"
