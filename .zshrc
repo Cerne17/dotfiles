@@ -270,6 +270,12 @@ else
   _cerne_apply_dark
 fi
 
+# fzf-tab turns zsh's completion menu into an fzf picker. It has to come after
+# compinit (oh-my-zsh runs it) and before any plugin that wraps ZLE widgets,
+# which is why it sits above autosuggestions and syntax highlighting.
+[ -f /opt/homebrew/share/fzf-tab/fzf-tab.plugin.zsh ] \
+  && source /opt/homebrew/share/fzf-tab/fzf-tab.plugin.zsh
+
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
