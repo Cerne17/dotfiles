@@ -225,6 +225,13 @@ cerne-theme() {
   command -v p10k >/dev/null 2>&1 && p10k reload
 
   if [ -n "$TMUX" ]; then
+    # @cerne_explicit gates the appearance probe at the bottom of ~/.tmux.conf.
+    # Returning to auto must clear it so a fresh server follows the system again.
+    if [ "$want" = "auto" ]; then
+      tmux set -gu @cerne_explicit
+    else
+      tmux set -g @cerne_explicit 1
+    fi
     if [ "$resolved" = "light" ]; then
       tmux source-file ~/.tmux-light.conf
     else
