@@ -1,4 +1,5 @@
-tap "homebrew/bundle"
+# `brew bundle` is built into Homebrew now; the homebrew/bundle tap was
+# deprecated and emptied, so tapping it fails the whole run.
 
 # Core tools the rest of this setup assumes. install.sh ends by telling you to
 # clone the Neovim config, which needs neovim, ripgrep, fd and make to work.
@@ -18,5 +19,7 @@ brew "bat"
 brew "powerlevel10k"
 brew "fzf-tab"
 brew "figlet"
-brew "font-meslo-lg-nerd-font"
+
+# Fonts are casks, not formulae.
+cask "font-meslo-lg-nerd-font"
 cask "ghostty"
