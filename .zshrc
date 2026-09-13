@@ -86,6 +86,14 @@ SAVEHIST=50000
 
 source $ZSH/oh-my-zsh.sh
 
+# oh-my-zsh already sets share_history, extended_history, hist_ignore_space and
+# hist_verify. These are the remaining ones that matter with several tmux panes
+# open at once: write each command as it is run rather than at exit, and keep
+# only the newest copy of a repeated command.
+setopt INC_APPEND_HISTORY
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_REDUCE_BLANKS
+
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
