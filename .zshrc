@@ -265,9 +265,65 @@ fi
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
+# nvm, lazy-loaded. Sourcing nvm.sh eagerly cost 340ms of the ~530ms shell
+# startup -- by far the largest single item. Put the default node straight on
+# PATH and stub only `nvm` itself, so node/npm/npx stay real binaries and nvm
+# is sourced once, on the first `nvm` call or the first .nvmrc directory.
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+  # The default alias is often a bare major ("24") while the directory is a
+  # full version ("v24.12.0"), so match exactly first, then the newest release
+  # of that major, then the newest installed. (On) is a reverse numeric sort,
+  # which orders v24.12.0 above v20.20.0 the way a plain sort would not.
+  # $(<file) and globbing are builtins -- no forks on the startup path.
+  _nvm_default_bin() {
+    local want
+    [ -r "$NVM_DIR/alias/default" ] || return 1
+    want="$(<"$NVM_DIR/alias/default")"
+    local -a found
+    found=( "$NVM_DIR/versions/node/$want"(N/) "$NVM_DIR/versions/node/v${want#v}"(N/) )
+    (( $#found )) || found=( "$NVM_DIR/versions/node/v${want#v}."*(N/) )
+    (( $#found )) || found=( "$NVM_DIR/versions/node/"v*(N/) )
+    (( $#found )) || return 1
+    print -r -- "${${(On)found}[1]}/bin"
+  }
+
+  _nvm_bin="$(_nvm_default_bin)"
+  if [ -n "$_nvm_bin" ] && [ -d "$_nvm_bin" ]; then
+    export PATH="$_nvm_bin:$PATH"
+  fi
+  unset -f _nvm_default_bin
+
+  _nvm_load() {
+    unset -f nvm node npm npx 2>/dev/null
+    . "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+  }
+
+  # Only shadow node/npm/npx when the default is NOT already on PATH; shadowing
+  # them otherwise would route every `node` call through a 340ms source.
+  if [ -n "$_nvm_bin" ]; then
+    nvm() { _nvm_load; nvm "$@"; }
+  else
+    for _cmd in nvm node npm npx; do
+      eval "$_cmd() { _nvm_load; $_cmd \"\$@\"; }"
+    done
+    unset _cmd
+  fi
+  unset _nvm_bin
+
+  # A project .nvmrc is the other reason to load nvm: honour it the first time
+  # one is seen, then remove the hook.
+  _nvm_autoload() {
+    if [ -f .nvmrc ]; then
+      add-zsh-hook -d chpwd _nvm_autoload
+      _nvm_load
+      nvm use >/dev/null 2>&1
+    fi
+  }
+  autoload -Uz add-zsh-hook
+  add-zsh-hook chpwd _nvm_autoload
+fi
 
 alias nvimrc="nvim ~/.config/nvim"
 alias com="git commit -m"
