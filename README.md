@@ -105,13 +105,50 @@ back. `cerne-theme auto` clears the flag.
 | `prefix + T` | Toggle light/dark for this server |
 | `prefix + I` / `prefix + U` | tpm: install / update plugins |
 
+`Ctrl+G` in the shell opens the navi cheatsheet picker (see below).
+
 Copy mode uses vi keys: `v` selects, `y` copies to the macOS clipboard.
 Sessions are saved and restored automatically by resurrect + continuum,
 Neovim sessions included.
 
+## Terminal Atlas
+
+`bin/atlas.sh` builds a single browsable HTML page listing every binding, alias
+and setting across all four tools, read out of the *running* configuration:
+Neovim's live keymap table (via `lua/config/keymap-explorer.lua` in the nvim
+repo), `tmux list-keys`, an interactive shell's alias table, and the Ghostty
+config. Adding a plugin is enough for its keys to appear on the next run —
+there is no list to maintain.
+
+```sh
+./bin/atlas.sh --open           # regenerate and open it
+./bin/atlas.sh ~/atlas.html     # regenerate to a specific path
+```
+
+Output defaults to `~/.cache/cerne-atlas/atlas.html`. Vim's own built-in
+mappings and mini.pairs are excluded — they describe the editor, not this
+setup.
+
+## Cheatsheets (navi)
+
+`Ctrl+G` opens [navi](https://github.com/denisidoro/navi): a fuzzy picker over
+the sheets in `cheats/`, which expands the chosen command into the prompt and
+prompts for any `<placeholder>` first. Placeholders backed by a `$ name:` line
+offer real values — `git checkout <lost_sha>` picks from your actual reflog
+rather than asking you to type a hash.
+
+`cheats/cerne.cheat` covers this setup itself: regenerating the Atlas, the
+theme toggle and its watcher, re-linking the dotfiles, the Brewfile, tmux
+sessions and tpm, Neovim maintenance, and the git operations that are easy to
+get wrong. `install.sh` symlinks the sheets into navi's cheats directory, so
+editing them here is editing them live.
+
+This is the one part of the setup that does *not* derive itself from anything —
+sheets are written by hand and go stale if the commands change.
+
 ## Shell startup
 
-Around 170ms. `nvm` is the reason it is not 500ms: sourcing `nvm.sh`
+Around 180ms. `nvm` is the reason it is not 500ms: sourcing `nvm.sh`
 eagerly cost 340ms, so the default node version goes straight on `PATH`
 and only the `nvm` command itself is a lazy stub. `node`, `npm` and `npx`
 stay real binaries and never pay for it; `nvm` loads on first use, or on
@@ -131,6 +168,9 @@ entering a directory with a `.nvmrc`.
 | `.config/ghostty/config` | Ghostty font/cursor-style/padding + `theme` directive |
 | `.config/ghostty/themes/cerne` | Ghostty color theme (dark) |
 | `.config/ghostty/themes/cerne-light` | Ghostty color theme (light) |
+| `bin/atlas.sh` | Regenerates the Terminal Atlas from the running config |
+| `bin/atlas/template.html` | The Atlas page; the generator injects the dataset into it |
+| `cheats/cerne.cheat` | navi cheatsheet for this setup (`Ctrl+G`) |
 | `bin/cerne-theme-watch.sh` | Pushes system-appearance changes into "auto" tmux/nvim instances |
 | `launchagents/pro.cerne.theme-watch.plist.template` | LaunchAgent for the above (installed to `~/Library/LaunchAgents`) |
 | `Brewfile` | packages this setup depends on |
