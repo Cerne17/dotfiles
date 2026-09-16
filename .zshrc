@@ -354,6 +354,11 @@ export PATH="$HOME/.antigravity-ide/antigravity-ide/bin:$PATH"
 # fzf (fuzzy finder): Ctrl+R history, Ctrl+T files, Alt+C cd
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# navi: Ctrl+G opens the cheatsheet picker and expands the chosen command into
+# the prompt, filling any <placeholder> first. Sheets live in dotfiles/cheats,
+# symlinked into navi's cheats directory by install.sh.
+command -v navi >/dev/null 2>&1 && eval "$(navi widget zsh)"
+
 # zoxide (smart cd) - replaces `z` plugin, avoids alias collision
 eval "$(zoxide init zsh)"
 

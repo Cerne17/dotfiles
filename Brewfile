@@ -18,6 +18,7 @@ brew "eza"
 brew "bat"
 brew "powerlevel10k"
 brew "fzf-tab"
+brew "navi"
 brew "figlet"
 
 # Fonts are casks, not formulae.

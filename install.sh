@@ -30,6 +30,18 @@ link ".config/ghostty/themes/cerne-light"
 
 chmod +x "$DOTFILES_DIR/bin/cerne-theme-watch.sh"
 
+# navi cheatsheets. navi reads whatever is in its cheats directory, so the
+# repo's sheets are symlinked in rather than copied.
+if command -v navi >/dev/null 2>&1; then
+  NAVI_CHEATS="$(navi info cheats-path 2>/dev/null || echo "$HOME/.local/share/navi/cheats")"
+  mkdir -p "$NAVI_CHEATS"
+  for sheet in "$DOTFILES_DIR"/cheats/*.cheat; do
+    [ -e "$sheet" ] || continue
+    ln -sfn "$sheet" "$NAVI_CHEATS/$(basename "$sheet")"
+    echo "linked  cheats/$(basename "$sheet")"
+  done
+fi
+
 # tmux plugin manager, required by the @plugin lines in .tmux.conf.
 TPM_DIR="$HOME/.tmux/plugins/tpm"
 if [ -d "$TPM_DIR" ]; then

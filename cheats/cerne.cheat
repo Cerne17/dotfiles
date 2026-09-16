@@ -1,0 +1,122 @@
+% cerne, dotfiles, setup
+
+# Regenerate the Terminal Atlas from the running config and open it
+~/dotfiles/bin/atlas.sh --open
+
+# Regenerate the Terminal Atlas to a specific file
+~/dotfiles/bin/atlas.sh <output_path>
+
+# Switch the cerne.pro palette across zsh, tmux and nvim
+cerne-theme <polarity>
+
+# Re-sync every "auto" tmux and nvim instance with the macOS appearance now
+~/dotfiles/bin/cerne-theme-watch.sh
+
+# Check the theme watcher LaunchAgent is loaded
+launchctl list pro.cerne.theme-watch
+
+# Tail the theme watcher log
+tail -f /tmp/cerne-theme-watch.log
+
+# Re-link the dotfiles into $HOME (backs up anything already there as .bak)
+~/dotfiles/install.sh
+
+# Verify the home configs are still symlinks and not drifted copies
+ls -l ~/.zshrc ~/.zprofile ~/.zshenv ~/.tmux.conf ~/.config/ghostty/config
+
+# Install every package this setup depends on
+brew bundle --file=~/dotfiles/Brewfile
+
+# Check the Brewfile is satisfied without installing anything
+brew bundle check --file=~/dotfiles/Brewfile
+
+# Time how long an interactive shell takes to start
+for i in $(seq 5); do /usr/bin/time -p zsh -i -c exit 2>&1 | awk '/^real/{printf "%.0fms\n", $2*1000}'; done
+
+$ polarity: echo 'light dark auto' | tr ' ' '\n'
+
+
+% cerne, tmux
+
+# Reload the tmux config
+tmux source-file ~/.tmux.conf
+
+# List every key binding in a table
+tmux list-keys -T <table>
+
+# Show a tmux option's current value
+tmux show -gv <tmux_option>
+
+# Kill the tmux server, dropping every session
+tmux kill-server
+
+# Attach to a session, or create it if it does not exist
+tmux new-session -A -s <session_name>
+
+# Save the current sessions now (tmux-resurrect)
+~/.tmux/plugins/tmux-resurrect/scripts/save.sh
+
+# Restore the saved sessions now (tmux-resurrect)
+~/.tmux/plugins/tmux-resurrect/scripts/restore.sh
+
+# Update the tmux plugins from the command line
+~/.tmux/plugins/tpm/bin/update_plugins all
+
+$ table: echo 'prefix root copy-mode-vi' | tr ' ' '\n'
+$ session_name: tmux list-sessions -F '#{session_name}' 2>/dev/null
+$ tmux_option: echo 'mode-keys history-limit focus-events status-style default-terminal set-clipboard escape-time' | tr ' ' '\n'
+
+
+% cerne, nvim
+
+# Sync plugins, then commit the lockfile as its own change
+nvim --headless "+Lazy! sync" +qa
+
+# Check every Lua file against the repo's StyLua config
+~/.local/share/nvim/mason/bin/stylua --check ~/.config/nvim
+
+# Format every Lua file in the nvim config
+~/.local/share/nvim/mason/bin/stylua ~/.config/nvim
+
+# Print how long each plugin took to load
+nvim --headless "+Lazy! profile" +qa
+
+# Dump every keymap that has a description, grouped by category
+nvim --headless "+lua vim.defer_fn(function() pcall(vim.api.nvim_exec_autocmds,'User',{pattern='VeryLazy',modeline=false}) vim.defer_fn(function() local g,o=require('config.keymap-explorer').by_category() for _,n in ipairs(o) do print(('%-38s %3d'):format(n,#g[n])) end vim.cmd('qa!') end,2000) end,6000)"
+
+# Browse every Neovim keymap by category, with a preview of each
+nvim -c 'lua require("config.keymap-explorer").categories()'
+
+# Check health of a specific plugin or subsystem
+nvim "+checkhealth <health_target>"
+
+$ health_target: echo 'lazy telescope mason nvim-treesitter vim.lsp vim.provider' | tr ' ' '\n'
+
+
+% cerne, git
+
+# Recover a commit that is no longer reachable from any branch
+git checkout <lost_sha>
+
+# Delete every local branch already merged into the default branch
+git branch --merged main | grep -vE '^\*|main' | xargs -r git branch -d
+
+# Find the commit that introduced a bug, between a bad and a good ref
+git bisect start <bad_ref> <good_ref>
+
+# Show what changed in a single file across every commit that touched it
+git log --follow -p -- <tracked_file>
+
+# Undo the last commit but keep the changes staged
+git reset --soft HEAD~1
+
+# Rewrite the last commit message
+git commit --amend
+
+# Show the diff that is about to be pushed
+git diff @{u}...HEAD
+
+$ lost_sha: git reflog --format='%h' 2>/dev/null
+$ bad_ref: git log --format='%h' -30 2>/dev/null
+$ good_ref: git log --format='%h' -30 2>/dev/null
+$ tracked_file: git ls-files 2>/dev/null
