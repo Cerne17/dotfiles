@@ -1,0 +1,392 @@
+<title>Cerne Terminal Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* cerne.pro tokens. Light is "sapwood", dark is "heartwood core" -- the same
+   WCAG-audited values the Ghostty themes, tmux status bar and zsh highlighting
+   use, so this page is literally painted in the palette it documents. */
+:root {
+  --ground: #ECEBE6;
+  --surface: #F5F4F0;
+  --raised: #D8D5CC;
+  --line: #CFCBC1;
+  --text: #1A1B1E;
+  --muted: #5A5852;
+  --accent: #8C3B24;
+  --accent-soft: rgba(140, 59, 36, .10);
+  --t-nvim: #3A6E52;
+  --t-zsh: #8C3B24;
+  --t-tmux: #526D89;
+  --t-ghostty: #97576A;
+  --shadow: 0 1px 2px rgba(26, 27, 30, .06);
+  --focus: #8C3B24;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0C0D10;
+    --surface: #14161B;
+    --raised: #1F2229;
+    --line: #272B33;
+    --text: #E8E4DB;
+    --muted: #9A968C;
+    --accent: #E89A3C;
+    --accent-soft: rgba(232, 154, 60, .12);
+    --t-nvim: #4E8F6B;
+    --t-zsh: #E89A3C;
+    --t-tmux: #5F7F9F;
+    --t-ghostty: #A8697C;
+    --shadow: none;
+    --focus: #E89A3C;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0C0D10;
+  --surface: #14161B;
+  --raised: #1F2229;
+  --line: #272B33;
+  --text: #E8E4DB;
+  --muted: #9A968C;
+  --accent: #E89A3C;
+  --accent-soft: rgba(232, 154, 60, .12);
+  --t-nvim: #4E8F6B;
+  --t-zsh: #E89A3C;
+  --t-tmux: #5F7F9F;
+  --t-ghostty: #A8697C;
+  --shadow: none;
+  --focus: #E89A3C;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--ground);
+  color: var(--text);
+  font-family: Archivo, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-inline: 20px;
+  padding-block: 40px 72px;
+}
+
+/* ---------- masthead ---------- */
+.mast { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
+.eyebrow {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted);
+}
+h1 {
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(30px, 5.5vw, 46px);
+  line-height: 1.05; margin: 0; text-wrap: balance;
+  letter-spacing: -.015em;
+}
+.lede { color: var(--muted); max-width: 62ch; margin: 0; }
+.lede code {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: .87em; color: var(--text);
+}
+
+/* ---------- tool tiles double as the primary filter ---------- */
+.tools {
+  display: grid; gap: 10px; margin-block: 26px 18px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.tool {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--hue);
+  border-radius: 3px;
+  cursor: pointer; text-align: left;
+  color: var(--text); font: inherit;
+  transition: border-color .12s, background .12s;
+}
+.tool:hover { background: var(--raised); }
+.tool[aria-pressed="true"] { background: var(--raised); border-color: var(--hue); border-left-color: var(--hue); }
+.tool .n {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 23px; font-weight: 600; font-variant-numeric: tabular-nums;
+  color: var(--hue); line-height: 1.1;
+}
+.tool .l { font-size: 13px; font-weight: 600; }
+.tool .s { font-size: 11.5px; color: var(--muted); }
+
+/* ---------- sticky command bar ---------- */
+.bar {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  padding-block: 12px;
+  background: var(--ground);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 6px;
+}
+.search { position: relative; flex: 1 1 260px; }
+.search input {
+  width: 100%; padding: 9px 12px 9px 30px;
+  font: inherit; font-size: 14px;
+  color: var(--text); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 3px;
+}
+.search input::placeholder { color: var(--muted); }
+.search .slash {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px; color: var(--muted); pointer-events: none;
+}
+.count {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-block: 14px 22px; }
+.chip {
+  font: inherit; font-size: 12.5px;
+  padding: 4px 10px; border-radius: 2px; cursor: pointer;
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--line);
+  transition: color .12s, border-color .12s, background .12s;
+}
+.chip:hover { color: var(--text); }
+.chip[aria-pressed="true"] {
+  color: var(--accent); border-color: var(--accent); background: var(--accent-soft);
+}
+.chip .c {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums; opacity: .65; margin-left: 5px;
+}
+
+/* ---------- results ---------- */
+.group { margin-bottom: 34px; }
+.group h2 {
+  font-family: Fraunces, Georgia, serif;
+  font-size: 19px; font-weight: 500; margin: 0 0 2px;
+  display: flex; align-items: baseline; gap: 10px; text-wrap: balance;
+}
+.group h2 .tag {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+  font-weight: 600; color: var(--hue);
+}
+.group h2 .num {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px; font-weight: 400; color: var(--muted);
+  font-variant-numeric: tabular-nums; margin-left: auto;
+}
+.rule { height: 1px; background: var(--line); margin-bottom: 8px; }
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) 1fr auto;
+  gap: 14px; align-items: baseline;
+  padding: 7px 8px; border-radius: 2px;
+  border-left: 2px solid transparent;
+}
+.row:nth-child(odd) { background: var(--surface); }
+.row:hover { border-left-color: var(--hue); }
+kbd {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12.5px; font-weight: 600; color: var(--text);
+  word-break: break-word;
+}
+.row .d { color: var(--text); font-size: 14px; min-width: 0; overflow-wrap: anywhere; }
+.row .m {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10.5px; color: var(--muted); letter-spacing: .06em;
+  white-space: nowrap;
+}
+.row .m .src { color: var(--muted); opacity: .8; }
+
+.empty {
+  padding: 40px 0; color: var(--muted); text-align: center;
+}
+.empty code { font-family: "JetBrains Mono", ui-monospace, monospace; color: var(--text); }
+
+footer {
+  margin-top: 46px; padding-top: 18px;
+  border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 12.5px;
+}
+footer code { font-family: "JetBrains Mono", ui-monospace, monospace; color: var(--text); font-size: .92em; }
+
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+@media (max-width: 560px) {
+  .row { grid-template-columns: 1fr; gap: 2px; padding-block: 9px; }
+  .row .m { grid-row: 1; justify-self: start; }
+}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="eyebrow">cerne.pro &middot; heartwood core</div>
+    <h1>Cerne Terminal Atlas</h1>
+    <p class="lede">
+      Every binding, alias and setting across the four tools, read straight out of
+      the running config &mdash; Neovim&rsquo;s live keymap table, <code>tmux list-keys</code>,
+      the interactive shell&rsquo;s alias table and the Ghostty config file. Filter by tool,
+      narrow by category, or just search.
+    </p>
+  </header>
+
+  <div class="tools" id="tools"></div>
+
+  <div class="bar">
+    <div class="search">
+      <span class="slash">/</span>
+      <input id="q" type="search" autocomplete="off" spellcheck="false"
+             placeholder="Search keys, descriptions, plugins&hellip;" aria-label="Search bindings">
+    </div>
+    <span class="count" id="count"></span>
+  </div>
+
+  <div class="chips" id="chips"></div>
+  <main id="out"></main>
+
+  <footer>
+    Generated from the live configuration, not a hand-written list &mdash; if a plugin
+    is added, its keys appear here the next time this is rebuilt. Neovim entries carry
+    their owning plugin; modes are Vim&rsquo;s own letters (<code>n</code> normal,
+    <code>v</code>/<code>x</code> visual, <code>i</code> insert, <code>o</code> operator-pending).
+    Vim built-ins and auto-pair mappings are excluded. Press <code>/</code> to search,
+    <code>Esc</code> to clear.
+  </footer>
+</div>
+
+<script id="data" type="application/json">__DATA__</script>
+<script>
+(function () {
+  var ALL = JSON.parse(document.getElementById("data").textContent);
+  var HUE = { Neovim: "var(--t-nvim)", zsh: "var(--t-zsh)", tmux: "var(--t-tmux)", Ghostty: "var(--t-ghostty)" };
+  var BLURB = {
+    Neovim: "LazyVim + extras",
+    zsh: "oh-my-zsh + p10k",
+    tmux: "3.6a + tpm",
+    Ghostty: "1.3.1"
+  };
+  var ORDER = ["Neovim", "zsh", "tmux", "Ghostty"];
+
+  var state = { tool: null, cat: null, q: "" };
+
+  var elTools = document.getElementById("tools");
+  var elChips = document.getElementById("chips");
+  var elOut = document.getElementById("out");
+  var elCount = document.getElementById("count");
+  var elQ = document.getElementById("q");
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  // Tool tiles: counts are fixed (they describe the setup, not the filter).
+  ORDER.forEach(function (t) {
+    var n = ALL.filter(function (i) { return i.tool === t; }).length;
+    var b = document.createElement("button");
+    b.className = "tool";
+    b.style.setProperty("--hue", HUE[t]);
+    b.setAttribute("aria-pressed", "false");
+    b.dataset.tool = t;
+    b.innerHTML = '<span class="n">' + n + '</span><span class="l">' + t + '</span><span class="s">' + BLURB[t] + '</span>';
+    b.addEventListener("click", function () {
+      state.tool = state.tool === t ? null : t;
+      state.cat = null;
+      render();
+    });
+    elTools.appendChild(b);
+  });
+
+  function matches(i) {
+    if (state.tool && i.tool !== state.tool) return false;
+    if (state.cat && i.cat !== state.cat) return false;
+    if (state.q) {
+      var hay = (i.key + " " + i.desc + " " + i.cat + " " + (i.src || "") + " " + i.tool).toLowerCase();
+      var terms = state.q.toLowerCase().split(/\s+/).filter(Boolean);
+      for (var k = 0; k < terms.length; k++) if (hay.indexOf(terms[k]) === -1) return false;
+    }
+    return true;
+  }
+
+  function render() {
+    Array.prototype.forEach.call(elTools.children, function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.tool === state.tool));
+    });
+
+    // Categories reflect the current tool + query, so a chip never leads nowhere.
+    var scope = ALL.filter(function (i) {
+      return (!state.tool || i.tool === state.tool) &&
+             (!state.q || matches(Object.assign({}, i, { cat: i.cat })));
+    });
+    var catCount = {};
+    scope.forEach(function (i) { catCount[i.cat] = (catCount[i.cat] || 0) + 1; });
+    var cats = Object.keys(catCount).sort(function (a, b) { return catCount[b] - catCount[a]; });
+
+    elChips.innerHTML = "";
+    cats.forEach(function (c) {
+      var b = document.createElement("button");
+      b.className = "chip";
+      b.setAttribute("aria-pressed", String(state.cat === c));
+      b.innerHTML = esc(c) + '<span class="c">' + catCount[c] + "</span>";
+      b.addEventListener("click", function () {
+        state.cat = state.cat === c ? null : c;
+        render();
+      });
+      elChips.appendChild(b);
+    });
+
+    var rows = ALL.filter(matches);
+    elCount.textContent = rows.length + " of " + ALL.length;
+
+    if (!rows.length) {
+      elOut.innerHTML = '<p class="empty">Nothing matches <code>' + esc(state.q) + "</code>.</p>";
+      return;
+    }
+
+    // Group by tool, then by category, keeping the tool order fixed.
+    var html = "";
+    ORDER.forEach(function (t) {
+      var inTool = rows.filter(function (i) { return i.tool === t; });
+      if (!inTool.length) return;
+      var byCat = {};
+      inTool.forEach(function (i) { (byCat[i.cat] = byCat[i.cat] || []).push(i); });
+      Object.keys(byCat).sort(function (a, b) { return byCat[b].length - byCat[a].length; }).forEach(function (c) {
+        html += '<section class="group" style="--hue:' + HUE[t] + '">' +
+                '<h2><span class="tag">' + esc(t) + "</span>" + esc(c) +
+                '<span class="num">' + byCat[c].length + "</span></h2><div class=\"rule\"></div>";
+        byCat[c].forEach(function (i) {
+          var meta = [];
+          if (i.modes) meta.push(esc(i.modes));
+          if (i.src) meta.push('<span class="src">' + esc(i.src) + "</span>");
+          html += '<div class="row"><kbd>' + esc(i.key) + '</kbd>' +
+                  '<span class="d">' + esc(i.desc) + "</span>" +
+                  '<span class="m">' + meta.join(" &middot; ") + "</span></div>";
+        });
+        html += "</section>";
+      });
+    });
+    elOut.innerHTML = html;
+  }
+
+  elQ.addEventListener("input", function () { state.q = elQ.value.trim(); render(); });
+
+  // Terminal habits: / focuses the filter, Esc clears and releases it.
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "/" && document.activeElement !== elQ) { e.preventDefault(); elQ.focus(); elQ.select(); }
+    if (e.key === "Escape") { elQ.value = ""; state.q = ""; elQ.blur(); render(); }
+  });
+
+  render();
+})();
+</script>
